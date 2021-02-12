@@ -123,13 +123,16 @@ function loadConfirmEmailPage(){
 
 
 function deletePhoto(){
-    
+    var PhotoID=$.urlParam('id');
+    console.log(PhotoID);
 }
 
 
 function uploadPhoto(){
     var title = $("#title").val();
+    console.log(title);
     var description = $("#description").val();
+    console.log(description);
     var tags = $("#tags").val();
     var imageFile = $('#imagefile')[0].files[0];
     var contenttype = imageFile.type;
@@ -154,12 +157,45 @@ function uploadPhoto(){
     }); 
 }
 
+function processAddPhoto(filename, title, description, tags){
+    var username = sessionStorage.getItem('username');    
+    var uploadedFileURL = `https://${PHOTOGALLERY_S3_BUCKET_URL}.s3.amazonaws.com/photos/${filename}`;
+
+    var datadir = {
+        username: username,
+        title: title,
+        description: description,
+        tags: tags,
+        uploadedFileURL: uploadedFileURL
+    };
+
+    console.log(datadir);
+
+    $.ajax({
+        url: `${API_URL}/photos`,
+        type: 'POST',
+        crossDomain: true,
+        dataType: 'json',
+        contentType: "application/json",
+        success: function(data) {                        
+            console.log(data);
+            // location.href='index.html';            
+        },
+        error: function() {
+            console.log("Failed");
+        },        
+        data: JSON.stringify(datadir)
+    }); 
+}
+
 function searchPhotos(){
     var query = $("#query").val();
 
     var datadir = {
         query: query
     };
+
+    // alert('DELETED');
 
     console.log(datadir);
 
@@ -197,36 +233,7 @@ function loadSearchPage(){
         handlePortfolio4ColGridSearch();        
 }
 
-function processAddPhoto(filename, title, description, tags){
-    var username = sessionStorage.getItem('username');    
-    var uploadedFileURL = `https://${PHOTOGALLERY_S3_BUCKET_URL}.s3.amazonaws.com/photos/${filename}`;
 
-    var datadir = {
-        username: username,
-        title: title,
-        description: description,
-        tags: tags,
-        uploadedFileURL: uploadedFileURL
-    };
-
-    console.log(datadir);
-
-    $.ajax({
-        url: `${API_URL}/photos`,
-        type: 'POST',
-        crossDomain: true,
-        dataType: 'json',
-        contentType: "application/json",
-        success: function(data) {                        
-            console.log(data);
-            // location.href='index.html';            
-        },
-        error: function() {
-            console.log("Failed");
-        },        
-        data: JSON.stringify(datadir)
-    }); 
-}
 
 function handlePortfolio4ColGridSearch() {
         $('#portfolio-4-col-grid-search').cubeportfolio({
@@ -359,7 +366,9 @@ function loadViewPhotoPage(){
         success: function(data) {            
             console.log(data);
             var photo=data.body[0];
-            htmlstr = htmlstr + '<img class=\"img-responsive\" src=\"'+photo.URL+'\" alt=\"\"> <div class=\"blog-grid-content\"> <h2 class=\"blog-grid-title-lg\"><a class=\"blog-grid-title-link\" href=\"#\">'+photo.Title+'</a></h2> <p>By: '+photo.Username+'</p> <p>Uploaded: '+photo.CreationTime+'</p> <p>'+photo.Description+'</p></div>'
+            console.log(photo.URL);
+            htmlstr = htmlstr + '<img class=\"img-responsive\" src=\"'+photo.URL+'\" alt=\"\"> <div class=\"blog-grid-content\"> <h2 class=\"blog-grid-title-lg\"><a class=\"blog-grid-title-link\" href=\"#\">'+photo.Title+'</a></h2> <p>By: '+photo.Username+'</p> <p id="uploadedID">Uploaded: '+photo.CreationTime+'</p> <p>'+photo.Description+'</p> </div>'
+            // htmlstr = htmlstr + '<img class=\"img-responsive\" src=\"'+photo.URL+'\" alt=\"\"> <div class=\"blog-grid-content\"> <h2 class=\"blog-grid-title-lg\"><a class=\"blog-grid-title-link\" href=\"#\">'+photo.Title+'</a></h2> <form id="deletephotoform" enctype="multipart/form-data"><p>By: '+photo.Username+'</p> <p id="uploadedID">Uploaded: '+photo.CreationTime+'</p> <p>'+photo.Description+'</p> <button type="submit" class="btn-base-bg btn-base-sm radius-3" >Delete</button></form></div>'
             $('#viewphoto-container').html(htmlstr);
             var tags=photo.Tags.split(',');
             console.log(tags)
@@ -385,7 +394,20 @@ $(document).ready(function(){
       event.preventDefault();
     });
 
+    // $("#deletephotoform" ).submit(function(event) {
+    //     alert('DELETED');
+    //     deletePhoto();
+    //     event.preventDefault();
+    //   });
+
+    $("#deleteBtn" ).click(function(event) {
+        console.log(event)
+        deletePhoto();
+        event.preventDefault();
+      });
+
     $("#addphotoform" ).submit(function(event) {
+      console.log(event)
       uploadPhoto();
       event.preventDefault();
     });
