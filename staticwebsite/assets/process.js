@@ -123,8 +123,34 @@ function loadConfirmEmailPage(){
 
 
 function deletePhoto(){
-    var PhotoID=$.urlParam('id');
+    var PhotoID= $.urlParam('id');
+    // var contenttype = imageFile.type;
     console.log(PhotoID);
+
+    var datadir = {
+        PhotoID: PhotoID
+    }
+
+    $.ajax({
+        url: `${API_URL}/deletephoto`,
+        type: 'POST',
+        crossDomain: true,
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(data) {
+            console.log('SUCCESS');
+            console.log(data);
+            location.href='index.html';
+         },
+        error: function(data){
+            console.log('FAILED');
+            console.log(data);
+            
+         },
+        data: JSON.stringify(datadir)
+    }); 
+
+    console.log('END');
 }
 
 
@@ -153,13 +179,18 @@ function uploadPhoto(){
             processAddPhoto(filename, title, description, tags);
          }
         },       
-        data: imageFile
+        data: imageFile,
+        error: function(data){
+            console.log(data);
+        }
     }); 
 }
 
 function processAddPhoto(filename, title, description, tags){
     var username = sessionStorage.getItem('username');    
     var uploadedFileURL = `https://${PHOTOGALLERY_S3_BUCKET_URL}.s3.amazonaws.com/photos/${filename}`;
+
+    
 
     var datadir = {
         username: username,
@@ -179,7 +210,7 @@ function processAddPhoto(filename, title, description, tags){
         contentType: "application/json",
         success: function(data) {                        
             console.log(data);
-            // location.href='index.html';            
+            location.href='index.html';            
         },
         error: function() {
             console.log("Failed");
@@ -194,8 +225,6 @@ function searchPhotos(){
     var datadir = {
         query: query
     };
-
-    // alert('DELETED');
 
     console.log(datadir);
 
