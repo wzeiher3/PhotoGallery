@@ -121,6 +121,38 @@ function loadConfirmEmailPage(){
     });  
 }
 
+function updatePhoto(){
+    var photoID = $.urlParam('id');
+    var title = $("#title").val();
+    var description = $("#description").val();
+    var tags = $("#tags").val();
+
+    var datadir = {
+        PhotoID: photoID,
+        title: title,
+        description: description,
+        tags: tags
+    }
+    console.log(datadir);
+
+    $.ajax({
+        url: `${API_URL}/updatephoto`,
+        type: 'POST',
+        crossDomain: true,
+        dataType: 'json',
+        contentType: "application/json",
+        success: function(data) {                        
+            console.log("SUCCESS");
+            location.href='index.html';            
+        },
+        error: function() {
+            console.log("Failed");
+            location.href='index.html';
+        },        
+        data: JSON.stringify(datadir)
+    }); 
+}
+
 
 function deletePhoto(){
     var PhotoID= $.urlParam('id');
@@ -432,6 +464,19 @@ $(document).ready(function(){
     $("#deleteBtn" ).click(function(event) {
         console.log(event)
         deletePhoto();
+        event.preventDefault();
+      });
+
+      $("#updatephotoform").submit(function(event){
+          updatePhoto();
+          event.preventDefault();
+      })
+
+      $("#updateBtn").click(function(event) {
+        console.log(event)
+        // updatePhoto($.urlParam('id'));
+        var photoID = $.urlParam('id')
+        location.href=`updatephoto.html?id=${photoID}`;
         event.preventDefault();
       });
 
